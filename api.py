@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Download model from Google Drive
-MODEL_URL = "https://drive.google.com/file/d/1OtSbRvuSn1XvcUtaKYEIoBXMnybBZmcG/view?usp=drive_link"
+MODEL_URL = "https://drive.google.com/file/d/1OtSbRvuSn1XvcUtaKYEIoBXMnybBZmcG/view?usp=sharing"
 MODEL_PATH = "rf_url_model.pkl"
 
 if not os.path.exists(MODEL_PATH):
