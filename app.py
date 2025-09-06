@@ -3,29 +3,45 @@ from pydantic import BaseModel
 import pickle
 import pandas as pd
 import logging
-import requests
+import gdown
 import os
+import time
 from predict import extract_features
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Download model from Google Drive
+# Download model from Google Drive with retries
 MODEL_URL = "https://drive.google.com/file/d/1OtSbRvuSn1XvcUtaKYEIoBXMnybBZmcG/view?usp=sharing"
-MODEL_PATH = "rf_url_model.pkl"
+MODEL_PATH = "/tmp/rf_url_model.pkl"  # Use /tmp for Render's ephemeral storage
+
+def download_model(url, path, retries=3, delay=5):
+    for attempt in range(retries):
+        try:
+            logger.info(f"Attempt {attempt + 1} to download model from Google Drive...")
+            gdown.download(url, path, quiet=False)
+            logger.info("Model downloaded successfully")
+            return True
+        except Exception as e:
+            logger.error(f"Download attempt {attempt + 1} failed: {str(e)}")
+            if attempt < retries - 1:
+                time.sleep(delay)
+    logger.error("All download attempts failed")
+    return False
 
 if not os.path.exists(MODEL_PATH):
-    logger.info("Downloading model from Google Drive...")
-    response = requests.get(MODEL_URL)
-    with open(MODEL_PATH, "wb") as f:
-        f.write(response.content)
-    logger.info("Model downloaded successfully")
+    if not download_model(MODEL_URL, MODEL_PATH):
+        raise Exception("Failed to download model after retries")
 
-with open(MODEL_PATH, "rb") as f:
-    bundle = pickle.load(f)
-model = bundle['model']
-feature_names = bundle['feature_names']
-class_mapping = bundle['class_mapping']
+try:
+    with open(MODEL_PATH, "rb") as f:
+        bundle = pickle.load(f)
+    model = bundle['model']
+    feature_names = bundle['feature_names']
+    class_mapping = bundle['class_mapping']
+except Exception as e:
+    logger.error(f"Failed to load model: {str(e)}")
+    raise
 
 app = FastAPI(title="URL Classification API", description="Detect benign/defacement/malware/phishing URLs", version="1.0")
 
