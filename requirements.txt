@@ -1,5 +1,6 @@
-fastapi
-uvicorn
-pandas
+fastapi==0.115.2
+uvicorn==0.32.0
+pandas==2.3.2
 scikit-learn==1.7.1
-joblib
+joblib==1.5.2
+requests==2.32.3
