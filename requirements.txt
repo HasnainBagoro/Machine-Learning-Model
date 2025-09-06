@@ -3,4 +3,4 @@ uvicorn==0.32.0
 pandas==2.3.2
 scikit-learn==1.7.1
 joblib==1.5.2
-requests==2.32.3
+gdown==5.2.0
